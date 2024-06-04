@@ -1,0 +1,11 @@
+---
+
+- hosts: web_servers
+  become: true
+  roles:
+    - webserver
+
+- hosts: all
+  become: true
+  roles:
+    - ansibleuser

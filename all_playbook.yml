@@ -1,0 +1,43 @@
+---
+
+- hosts: all
+  become: true
+  tasks:
+
+  - name: install apache2 and php package
+    apt:
+      name:
+        - apache2
+        - libapache2-mod-php
+      state: latest
+      update_cache: yes
+    when: ansible_distribution == "Ubuntu"
+    register: webserver
+
+  - name: Copy default_html file for site
+    copy:
+      src: default_site.html
+      dest: /var/www/html/index.html
+      owner: root
+      group: root
+      mode: 0644
+    when: webserver.changed
+
+  - name: create ansible user
+    user:
+      name: ansus
+      groups: root
+
+  - name: add ssh key for the ansible user
+    authorized_key:
+      user: ansus
+      key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIP+0rMK3oXfNUvyePKeWcIa3ZwxSoPlTh1Y72bKia7wX ansbile"
+
+  - name: add sudoers file for the ansible user
+    copy:
+      src: sudoer_ansus
+      dest: /etc/sudoers.d/ansus
+      owner: root
+      group: root
+      mode: 0440
+
